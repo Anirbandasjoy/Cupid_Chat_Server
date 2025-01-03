@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import User from "@/models/user.model";
 import { userExistByEmail } from "@/service/user/user.service";
-import { createToken } from "@/utils";
+import { accessRefreshTokenAndCookieSeter, createToken } from "@/utils";
 import jwt from "jsonwebtoken";
 import {
   createError,
@@ -11,8 +11,9 @@ import {
 } from "@/config";
 import sendingEmail from "@/service/email";
 import { successResponse } from "@/utils/response";
-import { activationEmail } from "@/service/email/emailTemplates/resetPasswordEmail";
+import { activationEmail } from "@/service/email/emailTemplates/activationEmail";
 import { findWithId } from "@/service";
+import { Types } from "mongoose";
 
 export const handleProcessRegistation = async (
   req: Request,
@@ -75,8 +76,24 @@ export const handleRegisterdUser = async (
     await userExistByEmail(decoded.email, User);
 
     await User.create(decoded);
+
+    const data = {
+      user: {
+        _id: decoded?._id as Types.ObjectId,
+        email: decoded?.email,
+      },
+      res,
+      next,
+    };
+
+    await accessRefreshTokenAndCookieSeter(data);
     successResponse(res, {
       message: "Registation Process Complete",
+      payload: {
+        _id: decoded._id,
+        name: decoded.name,
+        email: decoded.email,
+      },
     });
   } catch (error) {
     next(error);

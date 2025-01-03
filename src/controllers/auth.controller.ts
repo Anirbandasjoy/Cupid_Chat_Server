@@ -53,7 +53,6 @@ export const handleLogin = async (
       message: "Logged in successfully",
       payload: {
         _id: user._id,
-
         email: user.email,
       },
     });

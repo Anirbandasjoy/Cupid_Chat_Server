@@ -1,12 +1,11 @@
 import { client_url } from "@/config";
-
-export const resetPasswordEmail = (email: string, token: string) => `
+export const activationEmail = (email: string, token: string) => `
   <!DOCTYPE html>
   <html lang="en">
   <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Your Password</title>
+    <title>Activate Your Account</title>
     <style>
       body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -44,7 +43,7 @@ export const resetPasswordEmail = (email: string, token: string) => `
         line-height: 1.6;
         margin-bottom: 15px;
       }
-      .reset-link {
+      .activation-link {
         margin: 20px 0;
         padding: 15px;
         background: #f1f1f1;
@@ -90,18 +89,18 @@ export const resetPasswordEmail = (email: string, token: string) => `
   <body>
     <div class="email-container">
       <div class="email-header">
-        Reset Your Password
+        Activate Your Account
       </div>
       <div class="email-body">
         <h2>Hello ${email},</h2>
-        <p>We received a request to reset your password. You can reset your password by clicking the button below:</p>
-        <a href="${client_url}/reset-password?token=${token}" class="btn">Reset Your Password</a>
+        <p>Welcome to our platform! Please activate your account by clicking the button below:</p>
+        <a href="${client_url}/activate-account?token=${token}" class="btn">Activate Your Account</a>
         <p>If the button above doesn't work, you can copy and paste the following link into your browser:</p>
-        <div class="reset-link">
-          ${client_url}/reset-password?token=${token}
+        <div class="activation-link">
+          ${client_url}/activate-account?token=${token}
         </div>
-        <p>If you did not request a password reset, please ignore this email or contact our support team for assistance.</p>
-        <p>This link will expire in 10 minit for security reasons.</p>
+        <p>If you did not sign up for an account, please ignore this email or contact our support team for assistance.</p>
+        <p>This link will expire in 30 minit for security reasons.</p>
       </div>
       <div class="email-footer">
         <p>Thank you,<a href="https://www.qrinux.com">https://www.qrinux.com</p>

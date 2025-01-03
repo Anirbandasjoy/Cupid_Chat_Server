@@ -14,14 +14,16 @@ import { Router } from "express";
 const userRouter: Router = Router();
 
 userRouter.post(
-  "/process-singup",
+  "/process-signup",
   validateRequest(validateProcessRegistationSchema),
   handleProcessRegistation
 );
 userRouter.post(
-  "/singup",
+  "/signup",
   validateRequest(validateRegistationSchema),
   handleRegisterdUser
 );
 
 userRouter.get("/find-users", isLogin, isAdmin, handleFindAllUsers);
+
+export default userRouter;

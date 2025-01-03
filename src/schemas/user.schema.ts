@@ -7,5 +7,5 @@ export const validateProcessRegistationSchema = z.object({
 });
 
 export const validateRegistationSchema = z.object({
-  token: z.string().min(8).max(255),
+  token: z.string(),
 });
