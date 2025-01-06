@@ -1,7 +1,6 @@
 import {
   handelRefreshToken,
   handleForgotPassword,
-  handleGetCurrentUser,
   handleLogin,
   handleLogOut,
   handleResetPassword,
@@ -25,7 +24,7 @@ authRouter.post(
 
 authRouter.post("/logOut", isLogin, handleLogOut);
 authRouter.get("/refresh-token", handelRefreshToken);
-authRouter.get("/current-user", isLogin, handleGetCurrentUser);
+
 authRouter.post(
   "/forgot-password",
   validateRequest(validateForgotPassword),

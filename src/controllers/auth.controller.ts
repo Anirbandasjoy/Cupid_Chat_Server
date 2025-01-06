@@ -17,7 +17,6 @@ import bcrypt from "bcryptjs";
 import { Response, Request, NextFunction, CookieOptions } from "express";
 import { Types } from "mongoose";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { findWithId } from "@/service";
 import { resetPasswordEmail } from "@/service/email/emailTemplates/resetPasswordEmail";
 import sendingEmail from "@/service/email";
 
@@ -31,7 +30,7 @@ export const handleLogin = async (
 
     const user = await User.findOne({ email });
     if (!user) {
-      return next(createError(404, "User not found. Please login"));
+      return next(createError(404, "User Not Registerd. Please SignUp Frist"));
     }
 
     const matchPassword = await bcrypt.compare(password, user.password);
@@ -114,28 +113,6 @@ export const handelRefreshToken = async (
       statusCode: 200,
       message: "New access token is genareted",
       payload: {},
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const handleGetCurrentUser = async (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    if (!req.user) {
-      return next(createError(403, "User not authenticated"));
-    }
-    const options = {
-      password: 0,
-    };
-    const currentUser = await findWithId(req.user._id, User, options);
-    successResponse(res, {
-      message: "Fetched current user successfully",
-      payload: currentUser,
     });
   } catch (error) {
     next(error);

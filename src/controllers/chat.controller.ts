@@ -10,26 +10,37 @@ export const createChat = async (
   next: NextFunction
 ) => {
   try {
-    const { participants, isGroupChat, groupName, groupAvatar } = req.body;
+    const { participants } = req.body;
 
-    if (!participants || participants.length < 2) {
-      return next(createError(400, "At least two participants are required."));
+    if (!participants || participants.length !== 2) {
+      return next(
+        createError(
+          400,
+          "Only two participants are allowed for one-to-one chat."
+        )
+      );
     }
 
-    const newChat = await Chat.create({
-      participants,
-      isGroupChat,
-      groupName: isGroupChat ? groupName : undefined,
-      groupAvatar: isGroupChat ? groupAvatar : undefined,
+    const existingChat = await Chat.findOne({
+      participants: { $all: participants },
     });
 
-    io.emit("new_chat", newChat);
+    if (existingChat) {
+      return next(
+        createError(
+          400,
+          "A one-to-one chat already exists between these users."
+        )
+      );
+    }
 
+    const newChat = await Chat.create({ participants });
+
+    io.emit("new_chat", newChat);
     participants.forEach((participantId: any) => {
       io.to(participantId).emit("new_chat", newChat);
     });
 
-    // Return the created chat
     successResponse(res, {
       message: "Chat created successfully.",
       payload: newChat,
@@ -47,6 +58,7 @@ export const getChatsForUser = async (
 ) => {
   try {
     const userId = req.params.userId;
+
     const chats = await Chat.find({ participants: userId })
       .populate("participants", "email onlineStatus")
       .populate("latestMessage");

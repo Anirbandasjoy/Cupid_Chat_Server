@@ -14,23 +14,14 @@ const chatSchema = new Schema<IChat>(
       {
         type: Schema.Types.ObjectId,
         ref: "Message",
+        timestamp: { type: Date, default: Date.now },
       },
     ],
     isGroupChat: {
       type: Boolean,
       default: false,
     },
-    groupName: {
-      type: String,
-      required: function (this: any) {
-        return this.isGroupChat;
-      },
-    },
-    groupAvatar: {
-      type: String,
-      default:
-        "https://cdn.icon-icons.com/icons2/1378/PNG/512/avatardefault_92824.png",
-    },
+
     latestMessage: {
       type: Schema.Types.ObjectId,
       ref: "Message",

@@ -1,5 +1,6 @@
 import {
   handleFindAllUsers,
+  handleGetCurrentUser,
   handleProcessRegistation,
   handleRegisterdUser,
 } from "@/controllers/user.controller";
@@ -16,6 +17,7 @@ const userRouter: Router = Router();
 userRouter.post(
   "/process-signup",
   validateRequest(validateProcessRegistationSchema),
+
   handleProcessRegistation
 );
 userRouter.post(
@@ -24,6 +26,7 @@ userRouter.post(
   handleRegisterdUser
 );
 
-userRouter.get("/find-users", isLogin, isAdmin, handleFindAllUsers);
+userRouter.get("/find-users", isLogin, handleFindAllUsers);
+userRouter.get("/current-user", isLogin, handleGetCurrentUser);
 
 export default userRouter;

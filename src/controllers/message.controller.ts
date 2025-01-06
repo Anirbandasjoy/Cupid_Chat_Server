@@ -5,38 +5,48 @@ import Message from "@/models/message.model";
 import { successResponse } from "@/utils/response";
 import { Response, Request, NextFunction } from "express";
 
-export const addMessageToChat = async (
+export const sendMessage = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
-    const { chatId, sender, content } = req.body;
+    const { content, chatId } = req.body;
+    const senderId = req.user._id;
 
-    const newMessage = await Message.create({
-      chat: chatId,
-      sender,
-      content,
-    });
+    if (!content || !chatId) {
+      return next(createError(400, "Content and chatId are required"));
+    }
 
-    const updatedChat = await Chat.findByIdAndUpdate(
-      chatId,
-      { $push: { messages: newMessage._id }, latestMessage: newMessage._id },
-      { new: true }
-    ).populate("participants", "email onlineStatus");
+    // Find chat by ID
+    const chat = await Chat.findById(chatId);
 
-    if (!updatedChat) {
+    if (!chat) {
       return next(createError(404, "Chat not found"));
     }
 
-    io.emit("receive_message", {
-      chatId: updatedChat._id,
-      message: newMessage,
+    // Create new message
+    const newMessage = await Message.create({
+      sender: senderId,
+      content,
+      chat: chatId,
     });
 
+    // Push the new message to chat
+    chat.messages.push(newMessage._id);
+    chat.latestMessage = newMessage._id;
+    await chat.save();
+
+    // Emit message to participants (using socket.io for real-time)
+    chat.participants.forEach((participantId: any) => {
+      // Emit message to all participants of the chat
+      io.to(participantId).emit("message_received", newMessage);
+    });
+
+    // Send success response
     successResponse(res, {
-      message: "Message added to chat successfully.",
-      payload: { chat: updatedChat, message: newMessage },
+      message: "Message sent successfully",
+      payload: newMessage,
     });
   } catch (error) {
     console.error(error);

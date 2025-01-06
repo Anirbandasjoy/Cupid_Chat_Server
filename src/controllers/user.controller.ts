@@ -163,3 +163,31 @@ export const handleFindSingleUser = async (
     next(error);
   }
 };
+
+export const handleGetCurrentUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    console.log({ uesr: req.user?._id });
+    if (!req.user) {
+      return next(createError(403, "User not authenticated"));
+    }
+    const options = {
+      password: 0,
+    };
+
+    const currentUser = await User.findOne({ email: req.user.email }, options);
+    if (!currentUser) {
+      return next(createError(404, "User not found"));
+    }
+    console.log({ currentUser });
+    successResponse(res, {
+      message: "Fetched current user successfully",
+      payload: currentUser,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
