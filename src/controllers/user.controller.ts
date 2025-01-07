@@ -182,7 +182,7 @@ export const handleGetCurrentUser = async (
     if (!currentUser) {
       return next(createError(404, "User not found"));
     }
-    console.log({ currentUser });
+
     successResponse(res, {
       message: "Fetched current user successfully",
       payload: currentUser,
