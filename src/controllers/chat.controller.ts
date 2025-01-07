@@ -1,7 +1,8 @@
 import { io } from "@/app";
 import { createError } from "@/config";
 import Chat from "@/models/chat.model";
-import { successResponse } from "@/utils/response";
+import User from "@/models/user.model";
+import { errorResponse, successResponse } from "@/utils/response";
 import { Response, Request, NextFunction } from "express";
 
 export const createChat = async (
@@ -10,44 +11,48 @@ export const createChat = async (
   next: NextFunction
 ) => {
   try {
-    const { participants } = req.body;
+    const senderId = req.user?._id;
+    const { receiverId } = req.body;
 
-    if (!participants || participants.length !== 2) {
-      return next(
-        createError(
-          400,
-          "Only two participants are allowed for one-to-one chat."
-        )
-      );
+    const receiver = await User.findById(receiverId);
+    if (!receiver) {
+      return next(createError(404, "Receiver not found"));
+    }
+
+    if (senderId.toString() === receiverId.toString()) {
+      return next(createError(400, "You cannot chat with yourself"));
     }
 
     const existingChat = await Chat.findOne({
-      participants: { $all: participants },
+      participants: { $all: [senderId, receiverId] },
     });
 
     if (existingChat) {
-      return next(
-        createError(
-          400,
-          "A one-to-one chat already exists between these users."
-        )
-      );
+      errorResponse(res, {
+        statusCode: 400,
+        message: "A one-to-one chat already exists between these users.",
+        payload: { chatId: existingChat?._id },
+      });
     }
 
-    const newChat = await Chat.create({ participants });
-
-    io.emit("new_chat", newChat);
-    participants.forEach((participantId: any) => {
-      io.to(participantId).emit("new_chat", newChat);
+    const newChat = await Chat.create({
+      participants: [senderId, receiverId],
+      isGroupChat: false,
     });
 
+    io.emit("new_chat", newChat);
+    io.to(senderId.toString()).emit("new_chat", newChat);
+    io.to(receiverId.toString()).emit("new_chat", newChat);
+
+    // Return success response
     successResponse(res, {
+      statusCode: 201,
       message: "Chat created successfully.",
       payload: newChat,
     });
   } catch (error) {
     console.error(error);
-    next(error);
+    next(error); // Pass the error to your error-handling middleware
   }
 };
 
@@ -92,7 +97,10 @@ export const getChatById = async (
       return next(createError(400, "Chat not found."));
     }
 
-    res.status(200).json(chat);
+    successResponse(res, {
+      message: "Returned Chats",
+      payload: chat,
+    });
   } catch (error) {
     console.error(error);
     next(error);

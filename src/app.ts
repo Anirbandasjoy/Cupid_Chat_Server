@@ -15,7 +15,6 @@ import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
-
 const app: Application = express();
 const server = http.createServer(app);
 const io = new SocketIOServer(server);
@@ -57,13 +56,11 @@ app.use(((err: any, _req: Request, res: Response, _next: NextFunction) => {
 }) as unknown as ErrorRequestHandler);
 
 // socket connection
-
 io.on("connection", (socket) => {
   console.log("A user connected");
 
   socket.on("send_message", (message) => {
     console.log("Received message:", message);
-
     io.emit("receive_message", message);
   });
 
@@ -72,5 +69,5 @@ io.on("connection", (socket) => {
   });
 });
 
-export default app;
+export default server;
 export { io };

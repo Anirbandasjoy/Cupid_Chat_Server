@@ -1,8 +1,13 @@
-import app from "./app";
+import server from "./app";
 import { PORT } from "./config";
 import dbConnection from "./config/db";
 
-app.listen(PORT, async () => {
-  console.log(`Server is running at http://localhost:${PORT}`);
+const startServer = async () => {
   await dbConnection();
-});
+
+  server.listen(PORT, () => {
+    console.log(`Server is running at http://localhost:${PORT}`);
+  });
+};
+
+startServer();
