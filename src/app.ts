@@ -32,17 +32,17 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 100,
-  message: "Too many requests from this IP, please try again after 15 minutes",
-});
+// const limiter = rateLimit({
+//   windowMs: 15 * 60 * 1000,
+//   max: 100,
+//   message: "Too many requests from this IP, please try again after 15 minutes",
+// });
 
 app.get("/", (_req: Request, res: Response) => {
   successResponse(res, { message: "Welcome to the Cupid Chat" });
 });
 
-app.use("/api/v1", limiter, rootRouter);
+app.use("/api/v1", rootRouter);
 
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   return next(createError(404, "route not found"));
@@ -61,13 +61,22 @@ io.on("connection", (socket) => {
 
   socket.on("send_message", (message) => {
     console.log("Received message:", message);
-    io.emit("receive_message", message);
+    io.emit("receive_message", message); // Broadcast to all clients
+  });
+
+  socket.on("typing", (data) => {
+    // Emit typing event to everyone except the sender
+    socket.broadcast.emit("user_typing", data);
+  });
+
+  socket.on("stop_typing", (data) => {
+    // Emit stop typing event to everyone except the sender
+    socket.broadcast.emit("user_stopped_typing", data);
   });
 
   socket.on("disconnect", () => {
     console.log("User disconnected");
   });
 });
-
 export default server;
 export { io };

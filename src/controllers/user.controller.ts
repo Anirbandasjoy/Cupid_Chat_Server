@@ -2,7 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import User from "@/models/user.model";
 import { userExistByEmail } from "@/service/user/user.service";
-import { accessRefreshTokenAndCookieSeter, createToken } from "@/utils";
+import { createToken } from "@/utils";
 import jwt from "jsonwebtoken";
 import {
   createError,
@@ -77,16 +77,6 @@ export const handleRegisterdUser = async (
 
     await User.create(decoded);
 
-    const data = {
-      user: {
-        _id: decoded?._id as Types.ObjectId,
-        email: decoded?.email,
-      },
-      res,
-      next,
-    };
-
-    await accessRefreshTokenAndCookieSeter(data);
     successResponse(res, {
       message: "Registation Process Complete",
       payload: {

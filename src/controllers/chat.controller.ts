@@ -14,6 +14,8 @@ export const createChat = async (
     const senderId = req.user?._id;
     const { receiverId } = req.body;
 
+    console.log({ senderId, receiverId });
+
     const receiver = await User.findById(receiverId);
     if (!receiver) {
       return next(createError(404, "Receiver not found"));
