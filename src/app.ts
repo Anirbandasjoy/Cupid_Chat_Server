@@ -10,7 +10,7 @@ import express, {
 import { createError } from "./config";
 import { errorResponse, successResponse } from "./utils/response";
 import rootRouter from "./routes";
-import rateLimit from "express-rate-limit";
+
 import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
