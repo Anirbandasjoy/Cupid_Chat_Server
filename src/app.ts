@@ -24,7 +24,7 @@ app.use(fileUpload());
 
 app.use(
   cors({
-    origin: ["http://localhost:3000"],
+    origin: ["https://cupid-chat.vercel.app", "http://localhost:3000"],
     credentials: true,
   })
 );
