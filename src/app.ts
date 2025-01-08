@@ -15,9 +15,18 @@ import morgan from "morgan";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
+
 const app: Application = express();
 const server = http.createServer(app);
-const io = new SocketIOServer(server);
+
+// Configure Socket.io with CORS
+const io = new SocketIOServer(server, {
+  cors: {
+    origin: ["https://cupid-chat.vercel.app", "http://localhost:3000"],
+    credentials: true,
+    methods: ["GET", "POST"],
+  },
+});
 
 app.use(morgan("dev"));
 app.use(fileUpload());
@@ -32,30 +41,28 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-// const limiter = rateLimit({
-//   windowMs: 15 * 60 * 1000,
-//   max: 100,
-//   message: "Too many requests from this IP, please try again after 15 minutes",
-// });
 
+// Welcome Route
 app.get("/", (_req: Request, res: Response) => {
   successResponse(res, { message: "Welcome to the Cupid Chat" });
 });
 
+// Your API Routes
 app.use("/api/v1", rootRouter);
 
+// 404 Not Found Route
 app.use((_req: Request, _res: Response, next: NextFunction) => {
   return next(createError(404, "route not found"));
 });
 
+// Global Error Handler
 app.use(((err: any, _req: Request, res: Response, _next: NextFunction) => {
   const statusCode = err.status || 500;
   const message = err.message || "An unexpected error occurred";
-
   errorResponse(res, { statusCode, message, payload: err });
 }) as unknown as ErrorRequestHandler);
 
-// socket connection
+// Socket.io Connection Handling
 io.on("connection", (socket) => {
   console.log("A user connected");
 
@@ -78,5 +85,6 @@ io.on("connection", (socket) => {
     console.log("User disconnected");
   });
 });
+
 export default server;
 export { io };
